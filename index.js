@@ -27,3 +27,24 @@ app.use(express.json());
 
 app.use('/user', userRoutes);
 app.use('/editor', editorRoutes)
+// // Import the functions you need from the SDKs you need
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
+
+// // Your web app's Firebase configuration
+// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// const firebaseConfig = {
+//   apiKey: "AIzaSyCnwS_XmnhuzLZ0yJp7aYAUG8UvbtqT8Yg",
+//   authDomain: "codeeditorbackend.firebaseapp.com",
+//   projectId: "codeeditorbackend",
+//   storageBucket: "codeeditorbackend.appspot.com",
+//   messagingSenderId: "856125210830",
+//   appId: "1:856125210830:web:aa332ccddc6a824a3fd09f",
+//   measurementId: "G-07LQ1RTBGR"
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
