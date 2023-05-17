@@ -1,10 +1,24 @@
-const express = require('express');
-const mongoose = require('mongoose');
-require('dotenv').config();
-const userRoutes = require('./routes/user/user');
-const editorRoutes = require('./routes/editor/editor');
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import userRoutes from './routes/userRoutes.js'
+import cookieParser from "cookie-parser";
+import editor from './routes/editor/editor.mjs'
+dotenv.config();
 const app = express();
-const cors = require('cors')
+const corsOpts = {
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+  exposedHeaders: ["Content-Type"],
+};
+app.use(cors(corsOpts));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -12,39 +26,19 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.log(err));
+const port = process.env.PORT || "8080";
 
-app.listen(5000, () => console.log('Server started on port 5000'));
+app.use("/editor", editor);
+app.use("/api/users", userRoutes);
+app.get('/', (req, res) => { res.send('Server is ready') });
 
-const corsOpts = {
-    origin: '*',
-    credentials: true,
-    methods: ['GET','POST','HEAD','PUT','PATCH','DELETE'],
-    allowedHeaders: ['Content-Type'],
-    exposedHeaders: ['Content-Type']
-};
-app.use(cors(corsOpts));
-app.use(express.json());
+app.use(notFound)
+app.use(errorHandler)
+app.listen(port, () => console.log("Server started on port 8080"));
 
-app.use('/user', userRoutes);
-app.use('/editor', editorRoutes)
-// // Import the functions you need from the SDKs you need
-// import { initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
-// // TODO: Add SDKs for Firebase products that you want to use
-// // https://firebase.google.com/docs/web/setup#available-libraries
 
-// // Your web app's Firebase configuration
-// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCnwS_XmnhuzLZ0yJp7aYAUG8UvbtqT8Yg",
-//   authDomain: "codeeditorbackend.firebaseapp.com",
-//   projectId: "codeeditorbackend",
-//   storageBucket: "codeeditorbackend.appspot.com",
-//   messagingSenderId: "856125210830",
-//   appId: "1:856125210830:web:aa332ccddc6a824a3fd09f",
-//   measurementId: "G-07LQ1RTBGR"
-// };
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
+// POST /api/users*** - register a user
+// POST /api/users/auth*** - log in a user and get token
+// POST /api/users/logout*** - logout user and clear cookie
+// GET /api/users/profile*** - get user profile
+// PUT /api/users/profile*** - update profile

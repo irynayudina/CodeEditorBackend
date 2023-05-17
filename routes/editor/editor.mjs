@@ -1,13 +1,21 @@
-const express = require('express');
+// const express = require('express');
+// const router = express.Router();
+// const axios = require("axios");
+// const { languages, sampleCodes, languageVersions } = require('./EditorData');
+import express from "express";
+import axios from "axios";
+import { languages, sampleCodes, languageVersions } from "./EditorData.mjs";
+
 const router = express.Router();
-const axios = require("axios");
-const { languages, sampleCodes, languageVersions } = require('./EditorData');
 
 router.post('/executeJS', async (req, res) => {
   const { code } = req.body;
   const result = { ode: code, language: 'js'};
 
   res.json(result);
+})
+router.get('/', (req, res) => {
+  res.json({'route':'editor', 'method':'get'})
 })
 
 router.post('/execute', async (req, res) => {
@@ -47,4 +55,5 @@ router.post('/execute', async (req, res) => {
   }
 });
 
-module.exports = router;
+// module.exports = router;
+export default router;

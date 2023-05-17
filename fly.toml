@@ -1,0 +1,29 @@
+# fly.toml file generated for dry-field-3178 on 2023-03-25T10:26:44+02:00
+
+app = "dry-field-3178"
+kill_signal = "SIGINT"
+kill_timeout = 5
+mounts = []
+primary_region = "waw"
+processes = []
+
+[env]
+  PORT = "8080"
+
+[[services]]
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443

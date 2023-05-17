@@ -597,4 +597,6 @@ const languages = {
     'brainfuck':'Brainf**k',
     'c99':'C-99',
 }
-module.exports = { languages, sampleCodes, languageVersions }
+// module.exports = { languages, sampleCodes, languageVersions }
+// export default { languages, sampleCodes, languageVersions };
+export { languages, sampleCodes, languageVersions };
