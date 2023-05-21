@@ -39,7 +39,6 @@ const userSchema = mongoose.Schema(
       type: String,
       requireed: true,
     },
-    // pic: { data: Buffer, contentType: String },
     pic: { type: String },
     username: {
       type: String,
@@ -65,6 +64,12 @@ const userSchema = mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Discussion",
+      },
+    ],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
       },
     ],
     following: [
