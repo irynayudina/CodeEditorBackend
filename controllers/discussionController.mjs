@@ -68,38 +68,36 @@ const getDiscussionByID = asyncHandler(async (req, res) => {
 const getDiscussios = asyncHandler(async (req, res) => {
   const page = parseInt(req.query?.page) || 1;
   const topic = req.query?.topic;
-  const partOfName = req.query?.name;
-  const tags = req.query?.tags; // Array of tags
+  const titlePart = req.query?.title?.split(",");
+  const tags = req.query?.tags?.split(","); // Array of tags
   const limit = 4; // Number of discussions per page
-
   let filter = {};
 
   if (topic && topic !== "0") {
-    filter.topic = topic;
+    filter.topic = { $regex: new RegExp(topic, "i") };
   }
 
-  if (partOfName) {
-    filter.$or = [
-      { title: { $regex: partOfName, $options: "i" } },
-      { text: { $regex: partOfName, $options: "i" } },
-    ];
+  if (titlePart && Array.isArray(titlePart) && titlePart.length > 0) {
+    filter.$or = titlePart.map((title) => ({
+      title: { $regex: title, $options: "i" },
+    }));
   }
 
   if (tags && Array.isArray(tags) && tags.length > 0) {
-    filter.tags = { $in: tags };
+    // filter.tags = { $in: tags };
+    filter.$or = filter.$or || [];
+    filter.$or.push({ tags: { $in: tags } });
   }
 
   const totalDiscussions = await Discussion.countDocuments(filter);
   const totalPages = Math.ceil(totalDiscussions / limit);
 
-  // const totalDiscussions = await Discussion.countDocuments({});
-  // const totalPages = Math.ceil(totalDiscussions / limit);
-
-  const discussions = await Discussion.find({})
+  const discussions = await Discussion.find(filter)
     .select("_id title author topic text tags createdAt likes answers")
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
+  
   res.status(200).json({
     discussions,
     totalPages,
