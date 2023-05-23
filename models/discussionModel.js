@@ -38,6 +38,10 @@ const discussionSchema = mongoose.Schema(
         ref: "Comment",
       },
     ],
+    commentsLength: {
+      type: Number,
+      default: 0,
+    },
     likes: {
       type: Number,
       default: 0,

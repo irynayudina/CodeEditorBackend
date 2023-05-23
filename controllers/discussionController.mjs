@@ -68,10 +68,13 @@ const getDiscussionByID = asyncHandler(async (req, res) => {
 // @access  Public
 const getDiscussios = asyncHandler(async (req, res) => {
   const page = parseInt(req.query?.page) || 1;
-  const topic = req.query?.topic;
+  const topic = req.query?.topic === "all" ? null : req.query?.topic;
   const titlePart = req.query?.title?.split(",");
   const tags = req.query?.tags?.split(","); // Array of tags
   const limit = 4; // Number of discussions per page
+  const sortObj = req.query?.sortBy === 'popular' ? { commentsLength: -1 } : { createdAt: -1 };
+  console.log("getting filtered discussions")
+  console.log(req.query)
   let filter = {};
 
   if (topic && topic !== "0") {
@@ -94,8 +97,8 @@ const getDiscussios = asyncHandler(async (req, res) => {
   const totalPages = Math.ceil(totalDiscussions / limit);
 
   const discussions = await Discussion.find(filter)
-    .select("_id title author topic text tags createdAt likes comments")
-    .sort({ createdAt: -1 })
+    .select("_id title author topic text tags createdAt likes comments commentsLength")
+    .sort(sortObj)
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
@@ -115,12 +118,36 @@ const replyDiscussion = asyncHandler(async (req, res) => {
   // Update the discussion by pushing the commentId to the comments array
   const updatedDiscussion = await Discussion.findByIdAndUpdate(
     discussionId,
-    // { $push: { comments: commentId } },
-    { $push: { comments: { $each: [commentId], $position: 0 } } },
+    {
+      $push: { comments: { $each: [commentId], $position: 0 } },
+      $inc: { commentsLength: 1 }, // Increment commentsLength by 1
+    },
     { new: true }
   );
 
   res.status(200).json({ success: true, data: updatedDiscussion });
 })
 
-export { createDiscussion, getDiscussionByID, getDiscussios, replyDiscussion };
+// @desc    Update earlier created discussions with a field for comparison while sorting
+// route    POST /api/discussions/fixup/commentsLength
+// @access  Public
+const updateDiscussions = asyncHandler(async (req, res) => {
+  try {
+    await Discussion.updateMany(
+      { commentsLength: { $exists: false } },
+      { $set: { commentsLength: 0 } }
+    );
+    res.status(200).json({msg: "updated all"});
+  } catch (error) {
+    res.status(500);
+    throw new Error("Error updating discussions:");
+  }
+})
+
+export {
+  createDiscussion,
+  getDiscussionByID,
+  getDiscussios,
+  replyDiscussion,
+  updateDiscussions,
+};
