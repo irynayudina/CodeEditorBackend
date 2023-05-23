@@ -137,11 +137,31 @@ const updateDiscussions = asyncHandler(async (req, res) => {
       { commentsLength: { $exists: false } },
       { $set: { commentsLength: 0 } }
     );
-    res.status(200).json({msg: "updated all"});
+    res.status(200).json({ msg: "updated all" });
   } catch (error) {
     res.status(500);
     throw new Error("Error updating discussions:");
   }
+})
+
+// @desc    Update old comments with parent discussion
+// route    POST /api/discussions/fixup/commentsParentDiscussion
+// @access  Public
+const updateCommentsWithParentDiscussion = asyncHandler(async (req, res) => {
+  const discussions = await Discussion.find();
+
+  for (const discussion of discussions) {
+    if (discussion.comments.length > 0) {
+      await Comment.updateMany(
+        {
+          _id: { $in: discussion.comments },
+          parentDiscussion: { $exists: false },
+        },
+        { $set: { parentDiscussion: discussion._id } }
+      );
+    }
+  }
+  res.status(200).json({ msg: "updated all" });
 })
 
 export {
@@ -150,4 +170,5 @@ export {
   getDiscussios,
   replyDiscussion,
   updateDiscussions,
+  updateCommentsWithParentDiscussion,
 };

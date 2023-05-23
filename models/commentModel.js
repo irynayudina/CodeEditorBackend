@@ -30,6 +30,10 @@ const commentSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    parentDiscussion: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Discussion",
+    },
   },
   {
     timestamps: true,
