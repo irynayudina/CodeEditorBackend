@@ -6,6 +6,8 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 import userRoutes from './routes/userRoutes.js'
 import discussionRouter from './routes/discussionRouter.js'
+import commentRouter from "./routes/commentRouter.js";
+// import commen
 
 import cookieParser from "cookie-parser";
 import editor from './routes/editor/editor.mjs'
@@ -34,6 +36,7 @@ const port = process.env.PORT || "8080";
 app.use("/editor", editor);
 app.use("/api/users", userRoutes);
 app.use("/api/discussions", discussionRouter);
+app.use("/api/comments", commentRouter);
 app.get('/', (req, res) => { res.send('Server is ready') });
 
 app.use(notFound)

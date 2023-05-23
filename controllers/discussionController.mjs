@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import Discussion from "../models/discussionModel.js";
+import Comment from "../models/commentModel.js";
 
 // @desc    Create discussion, assign it to user
 // route    POST /api/discussions
@@ -22,15 +23,15 @@ const createDiscussion = asyncHandler(async (req, res) => {
     });
     if (discussion) {
         res.status(201).json({
-        _id: discussion._id,
+          _id: discussion._id,
           title: discussion.title,
           author: discussion.author,
           topic: discussion.topic,
           text: discussion.text,
           tags: discussion.tags,
-            createdAt: discussion.createdAt,
-            likes: discussion.likes,
-          answers: discussion.answers,
+          createdAt: discussion.createdAt,
+          likes: discussion.likes,
+          comments: discussion.comments,
         });
     } else {
         res.status(400);
@@ -42,7 +43,7 @@ const createDiscussion = asyncHandler(async (req, res) => {
 // route    GET /api/discussions
 // @access  Public
 const getDiscussionByID = asyncHandler(async (req, res) => {
-    const { discussionId} = req.body;
+    const { discussionId } = req.query || req.body;
     const discussion = await Discussion.findById(discussionId);
     if (discussion) {
         res.status(200).json({
@@ -54,7 +55,7 @@ const getDiscussionByID = asyncHandler(async (req, res) => {
           tags: discussion.tags,
         createdAt: discussion.createdAt,
         likes: discussion.likes,
-          answers: discussion.answers,
+          comments: discussion.comments,
         });
     } else {
         res.status(404);
@@ -93,7 +94,8 @@ const getDiscussios = asyncHandler(async (req, res) => {
   const totalPages = Math.ceil(totalDiscussions / limit);
 
   const discussions = await Discussion.find(filter)
-    .select("_id title author topic text tags createdAt likes answers")
+    .select("_id title author topic text tags createdAt likes comments")
+    .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
@@ -105,4 +107,20 @@ const getDiscussios = asyncHandler(async (req, res) => {
   });
 })
 
-export { createDiscussion, getDiscussionByID, getDiscussios };
+// @desc    Reply to a discussion with a comment - update a discussion by id pushing the id of comment to the array of dicsussion comments
+// route    POST /api/discussions/comment
+// @access  Public
+const replyDiscussion = asyncHandler(async (req, res) => {
+  const { discussionId, commentId } = req.body;
+  // Update the discussion by pushing the commentId to the comments array
+  const updatedDiscussion = await Discussion.findByIdAndUpdate(
+    discussionId,
+    // { $push: { comments: commentId } },
+    { $push: { comments: { $each: [commentId], $position: 0 } } },
+    { new: true }
+  );
+
+  res.status(200).json({ success: true, data: updatedDiscussion });
+})
+
+export { createDiscussion, getDiscussionByID, getDiscussios, replyDiscussion };

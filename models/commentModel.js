@@ -3,8 +3,16 @@ import mongoose from "mongoose";
 const commentSchema = mongoose.Schema(
   {
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      name: {
+        type: String,
+      },
+      username: {
+        type: String,
+      },
     },
     likes: {
       type: Number,
@@ -19,8 +27,9 @@ const commentSchema = mongoose.Schema(
       },
     ],
     isAnswer: {
-        type: Boolean,
-    }
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
