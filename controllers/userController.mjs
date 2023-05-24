@@ -98,24 +98,47 @@ const logoutUser = asyncHandler(async (req, res) => {
 // route    GET /api/users/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
-    const user = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      pic: user.pic,
-      username: user.username,
-      phone: user.phone,
-      projects: user.projects,
-      discussions: user.discussions,
-      following: user.following,
-      followers: user.followers,
-      notifications: user.notifications,
-      privacy: user.privacy,
-      socialMedia: user.socialMedia,
-      publicPhone: user.publicPhone,
-      publicEmail: user.publicEmail,
-    };
-    res.status(200).json(user)
+    const { username, _id, name } = req.user;
+    const { userId } = req.query;
+    const sameUser = _id == userId;
+    const user = await User.findById(userId);
+    if (sameUser) {
+        const userResult = {
+          _id: user._id,
+          name: user.name,
+            email: user.email,
+          pic: user.pic,
+          username: user.username,
+            phone: user.phone,
+          projects: user.projects,
+          discussions: user.discussions,
+          following: user.following,
+          followers: user.followers,
+            notifications: user.notifications,
+            privacy: user.privacy,
+          socialMedia: user.socialMedia,
+          publicPhone: user.publicPhone,
+          publicEmail: user.publicEmail,
+          sameUser,
+        };
+        res.status(200).json(userResult);   
+    } else {
+        const userResult = {
+          _id: user._id,
+          name: user.name,
+          pic: user.pic,
+          username: user.username,
+        //   projects: user.projects,
+        //   discussions: user.discussions,
+        //   following: user.following,
+        //   followers: user.followers,
+          socialMedia: user.socialMedia,
+          publicPhone: user.publicPhone,
+          publicEmail: user.publicEmail,
+          sameUser,
+        };
+        res.status(200).json(userResult);
+    }
 });
 
 // @desc    Update user profile
@@ -170,10 +193,94 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
+// api/users/follow
+// const followUser = asyncHandler(async (req, res) => {
+//     const user = await User.findById(req.user._id);
+//     const userId = req.body?.userId;
+//     if (!userId) {
+//         res.status(400);
+//         throw new Error("Specify a user to follow");
+//     }
+//     if (user.following.includes(userId)) {
+//         user.following = user.following.filter((id) => id != userId);
+//     } else {
+//         user.following.push(userId);
+//     }
+//     const updatedUser = await user.save();
+//     res.status(200).json({ updatedUser })
+// });
+const followUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const userId = req.body?.userId;
+  if (!userId) {
+    res.status(400);
+    throw new Error("Specify a user to follow");
+  }
+  if (user.following.includes(userId)) {
+    user.following = user.following.filter((id) => id != userId);
+  } else {
+    user.following.push(userId);
+    const followedUser = await User.findById(userId);
+    if (followedUser) {
+      followedUser.followers.push(user._id);
+      await followedUser.save();
+    }
+  }
+  const updatedUser = await user.save();
+  res.status(200).json({ updatedUser });
+});
+
+
+// /api/users/unfollow
+// const unfollowUser = asyncHandler(async (req, res) => {
+//   const user = await User.findById(req.user._id);
+//   const userId = req.body?.userId;
+//   if (!userId) {
+//     res.status(400);
+//     throw new Error("Specify a user to unfollow");
+//   }
+//   if (user.following.includes(userId)) {
+//     user.following = user.following.filter((id) => id != userId);
+//     const updatedUser = await user.save();
+//     console.log(user.following);
+//     res.status(200).json({ updatedUser });
+//   } else {
+//     res.status(400);
+//     throw new Error("You are not following this user");
+//   }
+// });
+const unfollowUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const userId = req.body?.userId;
+  if (!userId) {
+    res.status(400);
+    throw new Error("Specify a user to unfollow");
+  }
+  if (user.following.includes(userId)) {
+    user.following = user.following.filter((id) => id !== userId);
+    const followedUser = await User.findById(userId);
+    if (followedUser) {
+      followedUser.followers = followedUser.followers.filter(
+        (id) => id !== user._id
+      );
+      await followedUser.save();
+    }
+    const updatedUser = await user.save();
+    res.status(200).json({ updatedUser });
+  } else {
+    res.status(400);
+    throw new Error("You are not following this user");
+  }
+});
+
+
+
 export {
-    authUser,
-    registerUser,
-    logoutUser,
-    getUserProfile,
-    updateUserProfile
-}
+  authUser,
+  registerUser,
+  logoutUser,
+  getUserProfile,
+  updateUserProfile,
+  followUser,
+  unfollowUser,
+};

@@ -79,8 +79,8 @@ const getAllCommentsOfDiscussion = asyncHandler(async (req, res) => {
     throw new Error("Please specify the discussion");
   }
 
-  const totalDiscussions = await Comment.countDocuments(filter);
-  const totalPages = Math.ceil(totalDiscussions / limit);
+  const totalComments = await Comment.countDocuments(filter);
+  const totalPages = Math.ceil(totalComments / limit);
 
   const comments = await Comment.find(filter)
     .select("_id author text isAnswer createdAt answers likes parentDiscussion")
@@ -96,9 +96,41 @@ const getAllCommentsOfDiscussion = asyncHandler(async (req, res) => {
   });
 })
 
+// @desc    Update old comments with author _id field
+// route    POST /api/comments/updateAuthor
+// @access  Public
+const updateCommentsWithAuthor = asyncHandler(async (req, res) => {
+  // const comments = await Comment.find();
+
+  // for (const comment of comments) {
+  //   if (comment.author.id == null) {
+  //     await Comment.updateMany(
+  //       {
+  //         author.name: "John James",
+  //       },
+  //       { $set: { author._id =  "6464e5036b479e8e12489f87"} }
+  //     );
+  //   }
+  // }
+  const comments = await Comment.find({ "author.name": "John James" });
+  const oldComments = await Comment.countDocuments({ });
+  const totalComments = await Comment.countDocuments({ "author.name": "John James" });
+  console.log(oldComments);
+  console.log(totalComments);
+  for (const comment of comments) {
+    if (!comment.author._id) {
+      comment.author._id = "6464e5036b479e8e12489f87";
+      await comment.save();
+    }
+  }
+
+  res.status(200).json({ msg: "updated all", comments });
+})
+
 export {
   createComment,
   getAllComments,
   getCommentId,
   getAllCommentsOfDiscussion,
+  updateCommentsWithAuthor,
 };
