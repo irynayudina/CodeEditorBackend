@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const projectSchema = mongoose.Schema({
-  name: {
+  projectName: {
     type: String,
   },
   language: {
@@ -10,29 +10,44 @@ const projectSchema = mongoose.Schema({
   codeFile: {
     type: String,
   },
-  likes: {
-    type: Number,
-  },
+  // likes: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "User",
+  //   },
+  // ],
   isPublic: {
     type: Boolean,
   },
-  collaborators: [
-    {
+  // collaborators: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "User",
+  //   },
+  // ],
+  // description: {
+  //   type: String,
+  // },
+  // comments: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Comment",
+  //   },
+  // ],
+  author: {
+    _id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-  ],
-  description: {
-    type: String,
-  },
-  comments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
+    name: {
+      type: String,
     },
-  ],
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    username: {
+      type: String,
+    },
   },
 });
+
+const Project = mongoose.model("Project", projectSchema);
+
+export default Project;

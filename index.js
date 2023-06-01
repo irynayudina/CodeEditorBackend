@@ -3,14 +3,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-
 import userRoutes from './routes/userRoutes.js'
 import discussionRouter from './routes/discussionRouter.js'
 import commentRouter from "./routes/commentRouter.js";
-// import commen
-
 import cookieParser from "cookie-parser";
 import editor from './routes/editor/editor.mjs'
+import projectRouter from './routes/projectRouter.js'
+
 dotenv.config();
 const app = express();
 const corsOpts = {
@@ -31,16 +30,18 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.log(err));
-const port = process.env.PORT || "8080";
 
 app.use("/editor", editor);
 app.use("/api/users", userRoutes);
 app.use("/api/discussions", discussionRouter);
 app.use("/api/comments", commentRouter);
+app.use("/api/projects", projectRouter);
 app.get('/', (req, res) => { res.send('Server is ready') });
 
-app.use(notFound)
+app.use(notFound);
 app.use(errorHandler)
+
+const port = process.env.PORT || "8080";
 app.listen(port, () => console.log("Server started on port 8080"));
 
 
