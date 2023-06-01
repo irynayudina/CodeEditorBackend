@@ -71,6 +71,7 @@ const getDiscussios = asyncHandler(async (req, res) => {
   const topic = req.query?.topic === "all" ? null : req.query?.topic;
   const titlePart = req.query?.title?.split(",");
   const tags = req.query?.tags?.split(","); // Array of tags
+  const authorId = req.query?.authorId; // Optional author ID
   const limit = 4; // Number of discussions per page
   const sortObj = req.query?.sortBy === 'popular' ? { commentsLength: -1 } : { createdAt: -1 };
   console.log("getting filtered discussions")
@@ -91,6 +92,10 @@ const getDiscussios = asyncHandler(async (req, res) => {
     // filter.tags = { $in: tags };
     filter.$or = filter.$or || [];
     filter.$or.push({ tags: { $in: tags } });
+  }
+
+  if (authorId) {
+    filter["author._id"] = authorId;
   }
 
   const totalDiscussions = await Discussion.countDocuments(filter);
