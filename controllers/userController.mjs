@@ -129,9 +129,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
           pic: user.pic,
           username: user.username,
         //   projects: user.projects,
-        //   discussions: user.discussions,
-        //   following: user.following,
-        //   followers: user.followers,
+          // discussions: user.discussions,
+          following: user.following,
+          followers: user.followers,
           socialMedia: user.socialMedia,
           publicPhone: user.publicPhone,
           publicEmail: user.publicEmail,
@@ -139,6 +139,60 @@ const getUserProfile = asyncHandler(async (req, res) => {
         };
         res.status(200).json(userResult);
     }
+});
+
+// @desc    Get user people
+// route    GET /api/users/people
+// @access  Private
+const getUserPeople = asyncHandler(async (req, res) => {
+  const { user_id } = req.query;
+
+  try {
+    // Find the user by user_id
+    const user = await User.findById(user_id)
+      .populate("followers following");
+      // .select("name followers following");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Create an array to store the user's followers and following
+    const userPeople = [];
+
+    // Add followers to the userPeople array
+    user.followers.forEach((follower) => {
+      userPeople.push({
+        userID: follower._id.toString(),
+        name: follower.name,
+        role: ["follower"],
+      });
+    });
+
+    // Add following to the userPeople array
+    user.following.forEach((following) => {
+      // Check if the following user is already in the userPeople array as a follower
+      const existingUser = userPeople.find(
+        (user) => user.userID === following._id.toString()
+      );
+
+      if (existingUser) {
+        // If the following user is already in the array, add the "following" role to their role array
+        existingUser.role.push("following");
+      } else {
+        // If the following user is not in the array, add them as a new entry with the "following" role
+        userPeople.push({
+          userID: following._id.toString(),
+          name: following.name,
+          role: ["following"],
+        });
+      }
+    });
+
+    return res.json(userPeople);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 // @desc    Update user profile
@@ -280,6 +334,7 @@ export {
   registerUser,
   logoutUser,
   getUserProfile,
+  getUserPeople,
   updateUserProfile,
   followUser,
   unfollowUser,

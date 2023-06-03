@@ -4,6 +4,7 @@ import {
   registerUser,
   logoutUser,
   getUserProfile,
+  getUserPeople,
   updateUserProfile,
   followUser,
   unfollowUser,
@@ -19,6 +20,7 @@ router
   .route("/profile")
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
+router.route("/people").get(protect, getUserPeople);
 router.route("/follow").post(protect, followUser);
 router.route("/unfollow").post(protect, unfollowUser);
 
