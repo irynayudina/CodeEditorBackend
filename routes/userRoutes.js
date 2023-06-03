@@ -8,6 +8,7 @@ import {
   updateUserProfile,
   followUser,
   unfollowUser,
+  getUserFollowingFollowers,
 } from "../controllers/userController.mjs";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -21,6 +22,7 @@ router
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
 router.route("/people").get(protect, getUserPeople);
+router.route("/followingFollowers").get(protect, getUserFollowingFollowers);
 router.route("/follow").post(protect, followUser);
 router.route("/unfollow").post(protect, unfollowUser);
 

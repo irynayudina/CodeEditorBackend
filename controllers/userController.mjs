@@ -247,22 +247,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-// api/users/follow
-// const followUser = asyncHandler(async (req, res) => {
-//     const user = await User.findById(req.user._id);
-//     const userId = req.body?.userId;
-//     if (!userId) {
-//         res.status(400);
-//         throw new Error("Specify a user to follow");
-//     }
-//     if (user.following.includes(userId)) {
-//         user.following = user.following.filter((id) => id != userId);
-//     } else {
-//         user.following.push(userId);
-//     }
-//     const updatedUser = await user.save();
-//     res.status(200).json({ updatedUser })
-// });
 const followUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const userId = req.body?.userId;
@@ -271,7 +255,7 @@ const followUser = asyncHandler(async (req, res) => {
     throw new Error("Specify a user to follow");
   }
   if (user.following.includes(userId)) {
-    user.following = user.following.filter((id) => id != userId);
+    user.following = user.following.filter((id) => !id.equals(userId));
   } else {
     user.following.push(userId);
     const followedUser = await User.findById(userId);
@@ -284,25 +268,16 @@ const followUser = asyncHandler(async (req, res) => {
   res.status(200).json({ updatedUser });
 });
 
+const getUserFollowingFollowers = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  // return {following: [array of ids], followers: [array of ids]}
+  const following = user.following;
+  const followers = user.followers;
+  // const followers = await User.find({ _id: { $in: user.followers } }, "_id");
 
-// /api/users/unfollow
-// const unfollowUser = asyncHandler(async (req, res) => {
-//   const user = await User.findById(req.user._id);
-//   const userId = req.body?.userId;
-//   if (!userId) {
-//     res.status(400);
-//     throw new Error("Specify a user to unfollow");
-//   }
-//   if (user.following.includes(userId)) {
-//     user.following = user.following.filter((id) => id != userId);
-//     const updatedUser = await user.save();
-//     console.log(user.following);
-//     res.status(200).json({ updatedUser });
-//   } else {
-//     res.status(400);
-//     throw new Error("You are not following this user");
-//   }
-// });
+  res.status(200).json({ following, followers });
+});
+
 const unfollowUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const userId = req.body?.userId;
@@ -311,11 +286,11 @@ const unfollowUser = asyncHandler(async (req, res) => {
     throw new Error("Specify a user to unfollow");
   }
   if (user.following.includes(userId)) {
-    user.following = user.following.filter((id) => id !== userId);
+    user.following = user.following.filter((id) => !id.equals(userId));
     const followedUser = await User.findById(userId);
     if (followedUser) {
       followedUser.followers = followedUser.followers.filter(
-        (id) => id !== user._id
+        (id) => !id.equals(user._id)
       );
       await followedUser.save();
     }
@@ -338,4 +313,5 @@ export {
   updateUserProfile,
   followUser,
   unfollowUser,
+  getUserFollowingFollowers,
 };
