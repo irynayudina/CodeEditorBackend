@@ -120,4 +120,32 @@ const updateProjectById = asyncHandler(async (req, res) => {
   res.status(200).json(updatedProject);
 });
 
-export { createProject, getProjects, getProjectById, updateProjectById };
+// @desc    Delete project by ID
+// route    PUT /api/projects/:id
+// @access  Public
+const deleteProjectById = asyncHandler(async (req, res) => {
+  const authorId = req.user._id;
+  const { projectId} = req.body;
+
+  const project = await Project.findById(projectId);
+
+  if (!project) {
+    res.status(404);
+    throw new Error("Project not found");
+  }
+  if (authorId.toString() != project.author._id.toString()) {
+    res.status(401);
+    throw new Error("Not authorized to delete this project");
+  }
+
+  await project.remove();
+  res.status(200).json({ success: true, message: "Project deleted" });
+});
+
+export {
+  createProject,
+  getProjects,
+  getProjectById,
+  updateProjectById,
+  deleteProjectById,
+};
