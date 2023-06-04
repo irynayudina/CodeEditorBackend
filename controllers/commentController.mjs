@@ -73,7 +73,6 @@ const getAllCommentsOfDiscussion = asyncHandler(async (req, res) => {
   const limit = 4; // Number of discussions per page
   let filter = { parentDiscussion: { $in: discussionId } };
 
-  console.log("discussion id: " + discussionId);
   if (!discussionId) {
     res.status(400);
     throw new Error("Please specify the discussion");
@@ -88,6 +87,45 @@ const getAllCommentsOfDiscussion = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
+
+  res.status(200).json({
+    comments,
+    totalPages,
+    currentPage: page,
+  });
+})
+
+// @desc    Get all coments of a user
+// route    GET /api/comments/ofDiscussion
+// @access  Public
+const getAllCommentsOfUser = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query?.page) || 1;
+  const authorId = req.query?.authorId; // Optional author ID
+  const limit = 4; // Number of discussions per page
+  let filter = {};
+  if (authorId) {
+    filter["author._id"] = authorId;
+  }
+
+  if (!authorId) {
+    res.status(400);
+    throw new Error("Please specify the user");
+  }
+
+  const totalComments = await Comment.countDocuments(filter);
+  const totalPages = Math.ceil(totalComments / limit);
+
+  const comments = await Comment.find(filter)
+    .select("_id author text isAnswer createdAt answers likes parentDiscussion")
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .populate({
+      path: "parentDiscussion",
+      select: "title", // Select the 'title' field of the parentDiscussion
+    })
+    .exec();
+  
 
   res.status(200).json({
     comments,
@@ -115,8 +153,6 @@ const updateCommentsWithAuthor = asyncHandler(async (req, res) => {
   const comments = await Comment.find({ "author.name": "John James" });
   const oldComments = await Comment.countDocuments({ });
   const totalComments = await Comment.countDocuments({ "author.name": "John James" });
-  console.log(oldComments);
-  console.log(totalComments);
   for (const comment of comments) {
     if (!comment.author._id) {
       comment.author._id = "6464e5036b479e8e12489f87";
@@ -133,4 +169,5 @@ export {
   getCommentId,
   getAllCommentsOfDiscussion,
   updateCommentsWithAuthor,
+  getAllCommentsOfUser,
 };
