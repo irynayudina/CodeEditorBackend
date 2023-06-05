@@ -9,6 +9,7 @@ import commentRouter from "./routes/commentRouter.js";
 import cookieParser from "cookie-parser";
 import editor from './routes/editor/editor.mjs'
 import projectRouter from './routes/projectRouter.js'
+import collabRouter from './routes/collabRouter.js'
 
 dotenv.config();
 const app = express();
@@ -36,10 +37,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/discussions", discussionRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/projects", projectRouter);
+app.use("/api/collab", collabRouter);
 app.get('/', (req, res) => { res.send('Server is ready') });
 
 app.use(notFound);
-app.use(errorHandler)
+app.use(errorHandler);
 
 const port = process.env.PORT || "8080";
 app.listen(port, () => console.log("Server started on port 8080"));

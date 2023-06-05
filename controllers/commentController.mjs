@@ -18,7 +18,6 @@ const createComment = asyncHandler(async (req, res) => {
       isAnswer,
       parentDiscussion,
     });
-    //id author likes text answers isAnswer
   res.status(200).json({
     _id: comment._id,
     author: comment.author,
