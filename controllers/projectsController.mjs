@@ -34,7 +34,7 @@ const createProject = asyncHandler(async (req, res) => {
 // route    GET /api/projects
 // @access  Public
 const getProjects = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query?.page) || 1;
+  const page = parseInt(req.query?.page) || 1; 
   const projectName = req.query?.projectName;
   const authorId = req.query?.authorId;
   let languages = req.query?.language?.split(",") || [];

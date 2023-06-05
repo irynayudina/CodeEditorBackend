@@ -53,14 +53,20 @@ const createCollab = asyncHandler(async (req, res) => {
 // route    GET /api/collab
 // @access  Public
 const getCollab = asyncHandler(async (req, res) => {
-    const { owner_id } = req.query;
-    const ownersReq = [owner_id];
-    let filter = {};
-    if (owner_id && Array.isArray(ownersReq) && ownersReq.length > 0) {
-      // filter.tags = { $in: tags };
-      filter.$or = filter.$or || [];
-      filter.$or.push({ owners: { $in: ownersReq } });
-    }
+  const { owner_id } = req.query;
+  const page = parseInt(req.query?.page) || 1;
+  const limit = 4; // Number of projects per page
+
+  const ownersReq = [owner_id];
+  let filter = {};
+  if (owner_id && Array.isArray(ownersReq) && ownersReq.length > 0) {
+    // filter.tags = { $in: tags };
+    filter.$or = filter.$or || [];
+    filter.$or.push({ owners: { $in: ownersReq } });
+  }
+
+  const totalCollabs = await Collab.countDocuments(filter);
+  const totalPages = Math.ceil(totalCollabs / limit);
 
   try {
     const collabs = await Collab.find(filter)
@@ -69,8 +75,13 @@ const getCollab = asyncHandler(async (req, res) => {
         select: "_id username name",
       })
       .populate("associatedProject", "_id projectName")
-      .exec();
-    res.status(200).json(collabs);
+    .skip((page - 1) * limit)
+    .limit(limit).exec();
+    res.status(200).json({
+      collabs,
+      totalPages,
+      currentPage: page,
+    });
   } catch (error) {
     res.status(500);
     throw new Error("Error fetching collabs");
