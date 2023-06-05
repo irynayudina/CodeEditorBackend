@@ -5,24 +5,13 @@ const collabSchema = mongoose.Schema({
     type: String,
     unique: true,
   },
-  owner: {
-    _id: {
+  owners: [
+    {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    name: {
-      type: String,
-    },
-    username: {
-      type: String,
-    },
-  },
-  associatedProject: {
-    _id: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
-    name: {
-      type: String,
-    },
-  },
+  ],
+  associatedProject: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
 });
 
 const Collab = mongoose.model("Collab", collabSchema);
