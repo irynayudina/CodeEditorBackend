@@ -1,42 +1,51 @@
 import asyncHandler from "express-async-handler";
 import Collab from "../models/collabModel.js";
 import Project from "../models/projectModel.js";
+import mongoose from "mongoose";
 
 // @desc    Create collab, assign it to user
 // route    POST /api/collab
 // @access  Public
 const createCollab = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const autor = { _id};
-  const { collab_id, associatedProject_id} = req.body;
-
-  if (!collab_id || !associatedProject_id ) {
+  const autor = { _id };
+  const { collab_id, associatedProject_id } = req.body;
+  const associatedProject = associatedProject_id;
+  if (!collab_id || !associatedProject_id) {
     res.status(400);
     throw new Error("Cannot create without required data");
   }
 
   try {
-    const collab = await Collab.create({
+    const collabCheck = await Collab.findOne({
       collab_id: collab_id,
-      owners: [autor],
-      associatedProject: associatedProject_id,
+      associatedProject: associatedProject,
     });
-    const populatedCollab = await Collab.findById(collab._id).populate({
+    if (collabCheck) {
+      res.status(400);
+      throw new Error("Collab ID must be unique");
+    }
+
+    const collab = await Collab.create({
+      collab_id,
+      owners: [autor],
+      associatedProject,
+    });
+    console.log(collab);
+
+    const populatedCollab = await Collab.findById(collab._id)
+      .populate({
         path: "owners",
         select: "_id username name",
       })
-      .populate("associatedProject", "_id projectName").exec()
+      .populate("associatedProject", "_id projectName")
+      .exec();
+
     res.status(200).json(populatedCollab);
   } catch (error) {
-      console.log(error.message)
-    // Handle duplicate key error for unique id
-    if (error.code === 11000) {
-      res.status(400);
-      throw new Error("Collab ID must be unique");
-    } else {
-      res.status(500);
-      throw new Error("Error creating collab");
-    }
+    console.log(error.message);
+    res.status(500);
+    throw new Error("Error creating collab");
   }
 });
 
@@ -97,6 +106,33 @@ const getCollabById = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get collab
+// route    GET /api/collab/id
+// @access  Public
+const getCollabByProjectId = asyncHandler(async (req, res) => {
+  const { associatedProject_id } = req.query;
+  if (!associatedProject_id) {
+    res.status(400);
+    throw new Error("Specify project id");
+  }
+  const filter = {
+    associatedProject: associatedProject_id,
+  };
+  try {
+    const collab = await Collab.findOne(filter)
+      .populate({
+        path: "owners",
+        select: "_id username name",
+      })
+      .populate("associatedProject", "_id projectName")
+      .exec();
+    res.status(200).json({ collabId: collab?.collab_id });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Error fetching collabs");
+  }
+});
+
 const addOwnerToCollab = asyncHandler(async (req, res) => {
   const { collabId, ownerId, ownerName, ownerUsername } = req.body;
   if (!collabId || !ownerId) {
@@ -128,4 +164,10 @@ const addOwnerToCollab = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: updatedCollab });
 });
 
-export { createCollab, getCollab, getCollabById, addOwnerToCollab };
+export {
+  createCollab,
+  getCollab,
+  getCollabById,
+  addOwnerToCollab,
+  getCollabByProjectId,
+};

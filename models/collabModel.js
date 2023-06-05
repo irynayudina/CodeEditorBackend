@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const collabSchema = mongoose.Schema({
   collab_id: {
     type: String,
-    unique: true,
   },
   owners: [
     {
