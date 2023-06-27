@@ -9,7 +9,7 @@ const generateToken = (res, userId) => {
     secure: true,
     sameSite: "strict",
     httpOnly: false,
-    domain: "up.railway.app",
+    // domain: "up.railway.app",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 
