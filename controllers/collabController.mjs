@@ -44,8 +44,8 @@ const createCollab = asyncHandler(async (req, res) => {
     res.status(200).json(populatedCollab);
   } catch (error) {
     console.log(error.message);
-    res.status(500);
-    throw new Error("Error creating collab");
+    // res.status(500);
+    // throw new Error("Error creating collab");
   }
 });
 
