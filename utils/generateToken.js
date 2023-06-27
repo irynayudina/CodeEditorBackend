@@ -9,12 +9,13 @@ const generateToken = (res, userId) => {
     secure: true,
     sameSite: "strict",
     httpOnly: false,
-    domain: ".railway.app",
+    domain: "up.railway.app",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
 
     // domain: "http://127.0.0.1:3000",
     // domain: "http://localhost:8080",
-  });
+  
     // res.cookie("jwt", token, {
     //   httpOnly: true,
     //   secure: true, // Use secure cookies in production
