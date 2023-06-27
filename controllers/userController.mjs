@@ -12,7 +12,7 @@ const authUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
     // console.log(user)
     if (user && (await user.matchPassword(password))) {
-      // generateToken(res, user._id);
+      generateToken(res, user._id);
       // let token = req.cookies.jwt;
       // console.log(token)
       res.status(201).json({

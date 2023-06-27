@@ -5,18 +5,27 @@ const generateToken = (res, userId) => {
         expiresIn: '30d'
     });
   console.log(token)
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: true, // Use secure cookies in production
-      sameSite: "none", // Prevent CSRF attacks
-      // domain: ".railway.app",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
-  res.cookie("token", token, {
+  res.cookie("jwt", token, {
+    secure: true,
+    sameSite: "none",
     httpOnly: true,
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+    domain: ".railway.app",
+    // domain: "http://127.0.0.1:3000",
+    // domain: "http://localhost:8080",
   });
+    // res.cookie("jwt", token, {
+    //   httpOnly: true,
+    //   secure: true, // Use secure cookies in production
+    //   sameSite: "none", // Prevent CSRF attacks
+    //   // domain: ".railway.app",
+    //   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    // });
+  // res.cookie("token", token, {
+  //   httpOnly: true,
+  //   credentials: true,
+  //   origin: "http://localhost:3000",
+  //   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+  // });
   // res.cookie("token-jwt", token, {
   //   httpOnly: true,
   //   secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
