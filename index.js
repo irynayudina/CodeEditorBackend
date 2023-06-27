@@ -14,7 +14,7 @@ import collabRouter from './routes/collabRouter.js'
 dotenv.config();
 const app = express();
 const corsOpts = {
-  origin: "*",
+  origin: "https://create-react-app-site-production-f83f.up.railway.app",
   credentials: true,
   methods: ["GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
