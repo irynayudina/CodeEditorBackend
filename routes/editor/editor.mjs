@@ -36,8 +36,8 @@ router.post('/execute', async (req, res) => {
     args: cmdargs,
     language: language,
     versionIndex: version,
-    clientId: "38157445441da9562454315059d696da",
-    clientSecret: "fe6ed94ff0ddac37d10413b63308ead1deac8bc626bcf3abc40da90d2b519650"
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET
   };
   try {
     const response = await axios.post('https://api.jdoodle.com/v1/execute', program, {
